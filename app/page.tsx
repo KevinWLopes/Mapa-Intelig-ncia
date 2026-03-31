@@ -263,15 +263,7 @@ export default function Home() {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
+function StatCard(props) {
   return (
     <div
       style={{
@@ -281,8 +273,12 @@ function StatCard({
         padding: 14,
       }}
     >
-      <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>
+        {props.label}
+      </div>
+      <div style={{ fontSize: 26, fontWeight: 700, color: props.color }}>
+        {props.value}
+      </div>
     </div>
   );
 }
@@ -301,27 +297,15 @@ function GridBackground() {
   );
 }
 
-function PathLine({
-  x1,
-  y1,
-  x2,
-  y2,
-  color,
-}: {
-  x1: string;
-  y1: string;
-  x2: string;
-  y2: string;
-  color: string;
-}) {
+function PathLine(props) {
   return (
     <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
       <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke={color}
+        x1={props.x1}
+        y1={props.y1}
+        x2={props.x2}
+        y2={props.y2}
+        stroke={props.color}
         strokeWidth="3"
         strokeDasharray="8 8"
       />
@@ -329,23 +313,13 @@ function PathLine({
   );
 }
 
-function Point({
-  x,
-  y,
-  label,
-  color,
-}: {
-  x: string;
-  y: string;
-  label: string;
-  color: string;
-}) {
+function Point(props) {
   return (
     <div
       style={{
         position: "absolute",
-        left: x,
-        top: y,
+        left: props.x,
+        top: props.y,
         transform: "translate(-50%, -50%)",
       }}
     >
@@ -354,8 +328,8 @@ function Point({
           width: 18,
           height: 18,
           borderRadius: "50%",
-          background: color,
-          boxShadow: 0 0 18px ${color},
+          background: props.color,
+          boxShadow: 0 0 18px ${props.color},
           margin: "0 auto 6px auto",
         }}
       />
@@ -369,40 +343,24 @@ function Point({
           whiteSpace: "nowrap",
         }}
       >
-        {label}
+        {props.label}
       </div>
     </div>
   );
 }
 
-function Area({
-  left,
-  top,
-  width,
-  height,
-  color,
-  border,
-  title,
-}: {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-  color: string;
-  border: string;
-  title: string;
-}) {
+function Area(props) {
   return (
     <div
       style={{
         position: "absolute",
-        left,
-        top,
-        width,
-        height,
+        left: props.left,
+        top: props.top,
+        width: props.width,
+        height: props.height,
         borderRadius: 26,
-        background: color,
-        border: 2px dashed ${border},
+        background: props.color,
+        border: 2px dashed ${props.border},
       }}
     >
       <div
@@ -417,13 +375,13 @@ function Area({
           fontSize: 11,
         }}
       >
-        {title}
+        {props.title}
       </div>
     </div>
   );
 }
 
-const selectStyle: React.CSSProperties = {
+const selectStyle = {
   width: "100%",
   padding: 10,
   borderRadius: 10,
@@ -432,7 +390,7 @@ const selectStyle: React.CSSProperties = {
   color: "white",
 };
 
-const cardStyle: React.CSSProperties = {
+const cardStyle = {
   background: "#0f172a",
   border: "1px solid #1e293b",
   borderRadius: 14,
@@ -440,20 +398,20 @@ const cardStyle: React.CSSProperties = {
   marginBottom: 14,
 };
 
-const labelStyle: React.CSSProperties = {
+const labelStyle = {
   fontSize: 12,
   color: "#94a3b8",
   marginBottom: 8,
 };
 
-const panelStyle: React.CSSProperties = {
+const panelStyle = {
   background: "#0f172a",
   border: "1px solid #1e293b",
   borderRadius: 20,
   padding: 18,
 };
 
-const panelHeaderStyle: React.CSSProperties = {
+const panelHeaderStyle = {
   padding: 16,
   borderBottom: "1px solid #1e293b",
   display: "flex",
