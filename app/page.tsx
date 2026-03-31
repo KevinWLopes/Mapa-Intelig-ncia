@@ -17,7 +17,7 @@ import { AlertTriangle, Car, Eye, EyeOff, Filter, Layers3, MapPin, Route, Search
  */
 
 const GOOGLE_MAPS_API_KEY = (globalThis?.GOOGLE_MAPS_API_KEY as s…
-[22:38, 30/03/2026] KWL: export default function Home() {
+ export default function Home() {
   const cases = [
     {
       id: "CASO-001",
