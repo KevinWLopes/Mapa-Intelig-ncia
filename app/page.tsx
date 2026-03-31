@@ -100,7 +100,7 @@ export default function Home() {
 
   const totalCases = filteredCases.length;
   const highRiskCount = filteredCases.filter((item) => item.risco === "Alto").length;
-  const mainAxis = getMainAxis(filteredCases);
+  const mainAxis = filteredCases.length > 0 ? filteredCases[0].eixo : "-";
 
   return (
     <div
