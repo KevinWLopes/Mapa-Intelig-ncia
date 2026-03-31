@@ -37,3 +37,19 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
+        background: "#09131b",
+        color: "#ffffff",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "320px 1fr",
+          minHeight: "100vh",
+        }}
+      >
+        <aside
+          style={{
+            borderRight: "1px solid #1e293b",
+
