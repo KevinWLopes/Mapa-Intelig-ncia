@@ -1,49 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+type CaseItem = {
+  id: string;
+  modelo: string;
+  tipo: string;
+  perda: string;
+  recuperacao: string;
+  descarte: string;
+  eixo: string;
+  risco: "Alto" | "Médio" | "Baixo";
+  perdaPos: { left: string; top: string };
+  recPos: { left: string; top: string };
+  descartePos: { left: string; top: string };
+};
+
+const CASES: CaseItem[] = [
+  {
+    id: "001",
+    modelo: "HB20",
+    tipo: "Roubo",
+    perda: "Itaquera",
+    recuperacao: "Poá",
+    descarte: "Guaianases",
+    eixo: "Leste",
+    risco: "Alto",
+    perdaPos: { left: "22%", top: "34%" },
+    recPos: { left: "48%", top: "52%" },
+    descartePos: { left: "61%", top: "42%" },
+  },
+  {
+    id: "002",
+    modelo: "Onix",
+    tipo: "Furto",
+    perda: "Santo Amaro",
+    recuperacao: "Capão Redondo",
+    descarte: "Jardim São Luís",
+    eixo: "Sul",
+    risco: "Médio",
+    perdaPos: { left: "30%", top: "58%" },
+    recPos: { left: "70%", top: "30%" },
+    descartePos: { left: "58%", top: "46%" },
+  },
+  {
+    id: "003",
+    modelo: "Argo",
+    tipo: "Roubo",
+    perda: "São Mateus",
+    recuperacao: "Suzano",
+    descarte: "Itaim Paulista",
+    eixo: "Leste",
+    risco: "Alto",
+    perdaPos: { left: "18%", top: "24%" },
+    recPos: { left: "44%", top: "36%" },
+    descartePos: { left: "54%", top: "30%" },
+  },
+  {
+    id: "004",
+    modelo: "Kwid",
+    tipo: "Furto",
+    perda: "Vila Maria",
+    recuperacao: "Guarulhos",
+    descarte: "Cumbica",
+    eixo: "Norte",
+    risco: "Médio",
+    perdaPos: { left: "26%", top: "20%" },
+    recPos: { left: "62%", top: "20%" },
+    descartePos: { left: "50%", top: "26%" },
+  },
+];
 
 export default function Home() {
-  const cases = [
-    {
-      id: "001",
-      modelo: "HB20",
-      tipo: "Roubo",
-      perda: "Itaquera",
-      recuperacao: "Poá",
-      eixo: "Leste",
-      risco: "Alto",
-      perdaPos: { left: "22%", top: "34%" },
-      recPos: { left: "48%", top: "52%" },
-      descartePos: { left: "61%", top: "42%" },
-    },
-    {
-      id: "002",
-      modelo: "Onix",
-      tipo: "Furto",
-      perda: "Santo Amaro",
-      recuperacao: "Capão Redondo",
-      eixo: "Sul",
-      risco: "Médio",
-      perdaPos: { left: "30%", top: "58%" },
-      recPos: { left: "70%", top: "30%" },
-      descartePos: { left: "58%", top: "46%" },
-    },
-    {
-      id: "003",
-      modelo: "Argo",
-      tipo: "Roubo",
-      perda: "São Mateus",
-      recuperacao: "Suzano",
-      eixo: "Leste",
-      risco: "Alto",
-      perdaPos: { left: "18%", top: "24%" },
-      recPos: { left: "44%", top: "36%" },
-      descartePos: { left: "54%", top: "30%" },
-    },
-  ];
-
   const [selectedId, setSelectedId] = useState("001");
-  const selected = cases.find((c) => c.id === selectedId) || cases[0];
+  const [search, setSearch] = useState("");
+  const [modelFilter, setModelFilter] = useState("Todos");
+  const [typeFilter, setTypeFilter] = useState("Todas");
+  const [axisFilter, setAxisFilter] = useState("Todos");
+
+  const filteredCases = useMemo(() => {
+    return CASES.filter((item) => {
+      const matchSearch =
+        search.trim() === "" ||
+        item.id.toLowerCase().includes(search.toLowerCase()) ||
+        item.modelo.toLowerCase().includes(search.toLowerCase()) ||
+        item.perda.toLowerCase().includes(search.toLowerCase()) ||
+        item.recuperacao.toLowerCase().includes(search.toLowerCase());
+
+      const matchModel = modelFilter === "Todos" || item.modelo === modelFilter;
+      const matchType = typeFilter === "Todas" || item.tipo === typeFilter;
+      const matchAxis = axisFilter === "Todos" || item.eixo === axisFilter;
+
+      return matchSearch && matchModel && matchType && matchAxis;
+    });
+  }, [search, modelFilter, typeFilter, axisFilter]);
+
+  const selected =
+    filteredCases.find((item) => item.id === selectedId) || filteredCases[0] || CASES[0];
+
+  const totalCases = filteredCases.length;
+  const highRiskCount = filteredCases.filter((item) => item.risco === "Alto").length;
+  const mainAxis = getMainAxis(filteredCases);
 
   return (
     <div
@@ -67,7 +124,7 @@ export default function Home() {
           style={{
             background: "#071018",
             border: "1px solid #1e293b",
-            borderRadius: 16,
+            borderRadius: 18,
             padding: 20,
           }}
         >
@@ -85,61 +142,65 @@ export default function Home() {
             <h1 style={{ margin: "10px 0 8px 0", fontSize: 28 }}>
               Painel Operacional
             </h1>
-            <p style={{ margin: 0, color: "#94a3b8", fontSize: 14 }}>
-              Perda x recuperação com leitura territorial.
+            <p style={{ margin: 0, color: "#94a3b8", fontSize: 14, lineHeight: 1.5 }}>
+              Correlação entre perda, recuperação, descarte e eixo de recorrência.
             </p>
           </div>
 
-          <div
-            style={{
-              background: "#0f172a",
-              border: "1px solid #1e293b",
-              borderRadius: 14,
-              padding: 14,
-              marginBottom: 14,
-            }}
-          >
-            <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>
-              Busca rápida
-            </div>
+          <Card>
+            <SmallLabel>Busca rápida</SmallLabel>
             <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Caso, modelo, bairro..."
-              style={{
-                width: "100%",
-                padding: 10,
-                borderRadius: 10,
-                border: "1px solid #334155",
-                background: "#020617",
-                color: "white",
-              }}
+              style={inputStyle}
             />
+          </Card>
+
+          <Card>
+            <SmallLabel>Filtros</SmallLabel>
+            <div style={{ display: "grid", gap: 10 }}>
+              <select style={selectStyle} value={modelFilter} onChange={(e) => setModelFilter(e.target.value)}>
+                <option>Todos</option>
+                <option>HB20</option>
+                <option>Onix</option>
+                <option>Argo</option>
+                <option>Kwid</option>
+              </select>
+
+              <select style={selectStyle} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                <option>Todas</option>
+                <option>Roubo</option>
+                <option>Furto</option>
+              </select>
+
+              <select style={selectStyle} value={axisFilter} onChange={(e) => setAxisFilter(e.target.value)}>
+                <option>Todos</option>
+                <option>Leste</option>
+                <option>Sul</option>
+                <option>Norte</option>
+              </select>
+            </div>
+          </Card>
+
+          <div style={{ display: "grid", gap: 12, marginBottom: 14 }}>
+            <StatCard label="Casos filtrados" value={String(totalCases).padStart(2, "0")} color="#22d3ee" />
+            <StatCard label="Risco alto" value={String(highRiskCount).padStart(2, "0")} color="#f87171" />
+            <StatCard label="Eixo principal" value={mainAxis} color="#facc15" />
           </div>
 
-          <div
-            style={{
-              background: "#0f172a",
-              border: "1px solid #1e293b",
-              borderRadius: 14,
-              padding: 14,
-              marginBottom: 14,
-            }}
-          >
-            <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 12 }}>
-              Casos
-            </div>
-
+          <Card>
+            <SmallLabel>Casos</SmallLabel>
             <div style={{ display: "grid", gap: 10 }}>
-              {cases.map((item) => (
+              {filteredCases.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setSelectedId(item.id)}
                   style={{
                     textAlign: "left",
-                    background: selectedId === item.id ? "#122033" : "#020617",
+                    background: selected.id === item.id ? "#122033" : "#020617",
                     border:
-                      selectedId === item.id
-                        ? "1px solid #22d3ee"
-                        : "1px solid #1e293b",
+                      selected.id === item.id ? "1px solid #22d3ee" : "1px solid #1e293b",
                     borderRadius: 12,
                     padding: 12,
                     color: "white",
@@ -156,7 +217,12 @@ export default function Home() {
                     <strong>CASO {item.id}</strong>
                     <span
                       style={{
-                        color: item.risco === "Alto" ? "#f87171" : "#facc15",
+                        color:
+                          item.risco === "Alto"
+                            ? "#f87171"
+                            : item.risco === "Médio"
+                            ? "#facc15"
+                            : "#34d399",
                         fontSize: 12,
                       }}
                     >
@@ -171,14 +237,23 @@ export default function Home() {
                   </div>
                 </button>
               ))}
-            </div>
-          </div>
 
-          <div style={{ display: "grid", gap: 12 }}>
-            <StatCard label="Casos" value="03" color="#22d3ee" />
-            <StatCard label="Selecionado" value={selected.id} color="#34d399" />
-            <StatCard label="Eixo" value={selected.eixo} color="#facc15" />
-          </div>
+              {filteredCases.length === 0 && (
+                <div
+                  style={{
+                    background: "#020617",
+                    border: "1px solid #1e293b",
+                    borderRadius: 12,
+                    padding: 12,
+                    color: "#94a3b8",
+                    fontSize: 13,
+                  }}
+                >
+                  Nenhum caso encontrado.
+                </div>
+              )}
+            </div>
+          </Card>
         </aside>
 
         <main style={{ display: "grid", gap: 20 }}>
@@ -213,43 +288,30 @@ export default function Home() {
             <div
               style={{
                 position: "relative",
-                height: 480,
+                height: 500,
                 background: "linear-gradient(180deg, #0b1220 0%, #0a1622 100%)",
+                overflow: "hidden",
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
-                  backgroundSize: "36px 36px",
-                }}
-              />
+              <GridBackground />
 
-              <div
-                style={{
-                  position: "absolute",
-                  left: "56%",
-                  top: "18%",
-                  width: "24%",
-                  height: "28%",
-                  borderRadius: 26,
-                  background: "rgba(239,68,68,0.18)",
-                  border: "2px dashed #ef4444",
-                }}
+              <DangerArea
+                left="56%"
+                top="18%"
+                width="24%"
+                height="28%"
+                bg="rgba(239,68,68,0.18)"
+                border="#ef4444"
+                title="Área sensível"
               />
-              <div
-                style={{
-                  position: "absolute",
-                  left: "22%",
-                  top: "48%",
-                  width: "20%",
-                  height: "18%",
-                  borderRadius: 26,
-                  background: "rgba(245,158,11,0.16)",
-                  border: "2px dashed #f59e0b",
-                }}
+              <DangerArea
+                left="22%"
+                top="48%"
+                width="20%"
+                height="18%"
+                bg="rgba(245,158,11,0.16)"
+                border="#f59e0b"
+                title="Destino recorrente"
               />
 
               <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
@@ -289,7 +351,7 @@ export default function Home() {
                 left={selected.descartePos.left}
                 top={selected.descartePos.top}
                 color="#facc15"
-                label="Descarte"
+                label={`Descarte • ${selected.descarte}`}
               />
 
               <div
@@ -315,14 +377,7 @@ export default function Home() {
           </section>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-            <section
-              style={{
-                background: "#0f172a",
-                border: "1px solid #1e293b",
-                borderRadius: 20,
-                padding: 18,
-              }}
-            >
+            <section style={panelStyle}>
               <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>
                 Detalhes do caso
               </div>
@@ -332,28 +387,24 @@ export default function Home() {
                 <div><strong>Ocorrência:</strong> {selected.tipo}</div>
                 <div><strong>Perda:</strong> {selected.perda}</div>
                 <div><strong>Recuperação:</strong> {selected.recuperacao}</div>
+                <div><strong>Descarte:</strong> {selected.descarte}</div>
                 <div><strong>Eixo:</strong> {selected.eixo}</div>
                 <div><strong>Risco:</strong> {selected.risco}</div>
               </div>
             </section>
 
-            <section
-              style={{
-                background: "#0f172a",
-                border: "1px solid #1e293b",
-                borderRadius: 20,
-                padding: 18,
-              }}
-            >
+            <section style={panelStyle}>
               <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>
                 Leitura automática
               </div>
               <div style={{ color: "#cbd5e1", fontSize: 14, lineHeight: 1.7 }}>
-                O caso {selected.id} apresenta deslocamento do eixo {selected.eixo},
-                com perda em <strong>{selected.perda}</strong> e recuperação em{" "}
-                <strong>{selected.recuperacao}</strong>. O padrão sugere correlação
-                territorial e necessidade de cruzamento com áreas sensíveis e pontos
-                recorrentes de descarte.
+                O caso {selected.id} apresenta deslocamento no eixo{" "}
+                <strong>{selected.eixo}</strong>, com perda em{" "}
+                <strong>{selected.perda}</strong> e recuperação em{" "}
+                <strong>{selected.recuperacao}</strong>. O descarte em{" "}
+                <strong>{selected.descarte}</strong> sugere correlação territorial e
+                necessidade de cruzamento com áreas sensíveis, recorrência regional e
+                possíveis pontos de retenção.
               </div>
             </section>
           </div>
@@ -361,6 +412,26 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: "#0f172a",
+        border: "1px solid #1e293b",
+        borderRadius: 14,
+        padding: 14,
+        marginBottom: 14,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SmallLabel({ children }: { children: React.ReactNode }) {
+  return <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>{children}</div>;
 }
 
 function StatCard({
@@ -383,6 +454,68 @@ function StatCard({
     >
       <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 8 }}>{label}</div>
       <div style={{ fontSize: 26, fontWeight: 700, color }}>{value}</div>
+    </div>
+  );
+}
+
+function GridBackground() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
+        backgroundSize: "36px 36px",
+      }}
+    />
+  );
+}
+
+function DangerArea({
+  left,
+  top,
+  width,
+  height,
+  bg,
+  border,
+  title,
+}: {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  bg: string;
+  border: string;
+  title: string;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left,
+        top,
+        width,
+        height,
+        borderRadius: 26,
+        background: bg,
+        border: `2px dashed ${border}`,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          background: "rgba(2,6,23,0.9)",
+          border: "1px solid #334155",
+          borderRadius: 8,
+          padding: "4px 8px",
+          fontSize: 11,
+        }}
+      >
+        {title}
+      </div>
     </div>
   );
 }
@@ -432,3 +565,28 @@ function MapPoint({
     </div>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: 10,
+  borderRadius: 10,
+  border: "1px solid #334155",
+  background: "#020617",
+  color: "white",
+};
+
+const selectStyle: React.CSSProperties = {
+  width: "100%",
+  padding: 10,
+  borderRadius: 10,
+  border: "1px solid #334155",
+  background: "#020617",
+  color: "white",
+};
+
+const panelStyle: React.CSSProperties = {
+  background: "#0f172a",
+  border: "1px solid #1e293b",
+  borderRadius: 20,
+  padding: 18,
+};
